@@ -5,8 +5,8 @@
 
 (def costs-2014-vegas
   "A sample data structure representing expenses. For each item, the :payer is
-   the one who paid the amount :paid on behalf of all :users. Thus, all :users
-   owe the :payer an equal share of :paid dollars."
+  the one who paid the amount :paid on behalf of all :users. Thus, all :users
+  owe the :payer an equal share of :paid dollars."
   (let [everybody [:al :am :jd :kj :mr :rc :to]]
     [{:title "Marquee"  :paid 2333.00 :payer :kj :users everybody}
      {:title "Daylight" :paid 2309.00 :payer :to :users everybody}
@@ -28,9 +28,15 @@
      {:title "PH"  :paid 9999.99 :payer :nw :users everybody}
      {:title "MGM" :paid 9999.99 :payer :to :users everybody}]))
 
+(defn names' [costs]
+  "Extract all people's names from the :payer and :users values to find out all
+  involved people."
+  (distinct (into (map :payer costs)
+                  (flatten (map :users costs)))))
+
 (defn names [costs]
   "Extract all people's names from the :payer and :users values to find out all
-   involved people."
+  involved people."
   (distinct (into (map :payer costs)
                   (flatten (map :users costs)))))
 
@@ -57,7 +63,8 @@
                      (format-money balance)))))
 
 ; (defn map-map
-;   "Returns new map with f applied to each k-v pair in m. f should be a function that takes args k and v and returns a map-like value such as {new-k new-v}.
+;   "Returns new map with f applied to each k-v pair in m. f should be a function
+;   that takes args k and v and returns a map-like value such as {new-k new-v}."
 ;   [f m]
 ;   (into (empty m) (map #(apply f %) m)) )
 
@@ -109,8 +116,7 @@
 (defn build-persons [costs]
   "Transform cost-oriented data to person-oriented data.
 
-   e.g. {:alice {:share 100.0 :paid 44.445 :balance 55.555} ...}
-  "
+  e.g. {:alice {:share 100.0 :paid 44.445 :balance 55.555} ...}"
   (let [unsorted (unsorted-persons costs)]
     (into (sorted-map-by (fn [a b]
                            (compare (-> unsorted b :balance)
@@ -125,7 +131,7 @@
 
 (defn naive-payments [persons]
   "Naive impl that has (n-1) payments. Single payments flow person-to-person
-   from person owing most to person owed most. Simple but large payments."
+  from person owing most to person owed most. Simple but large payments."
   (loop [remaining persons
          got-paid 0
          payments []]
@@ -140,7 +146,9 @@
 
 (defn minimal-payments [persons]
   "Better impl that has few, smaller payments. Person owing most pays person
-   owed most, recursively. Even better would implement knapsack problem."
+  owed most, recursively. Even better would first check if any ower owes same
+  exact amount as an owee is owed and resolve that inequality first, or
+  implement a knapsack problem solution"
   (loop [remaining persons
          payments []]
     (let [person-has-balance (fn [[_ {v :balance}]] (not (zero? v)))
